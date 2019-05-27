@@ -169,7 +169,6 @@ namespace Fusee.Tutorial.Core
         {
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
-
             _camAngle += Keyboard.ADAxis* Time.DeltaTime;
             _lowerangle += Keyboard.WSAxis* Time.DeltaTime;
             _upperangle += Keyboard.UpDownAxis * Time.DeltaTime;
