@@ -19,7 +19,14 @@ namespace Fusee.Tutorial.Core
         private SceneContainer _scene;
         private SceneRenderer _sceneRenderer;
         private float _camAngle = 0;
+        private float _upperangle = 0;
+        private float _lowerangle = 0;
+        private float _bodyangle = 0;
         private TransformComponent _baseTransform;
+        private TransformComponent _bodyTransform;
+        private TransformComponent _upperTransform;
+        private TransformComponent _lowerTransform;
+
 
         SceneContainer CreateScene()
         {
@@ -30,7 +37,24 @@ namespace Fusee.Tutorial.Core
                 Scale = new float3(1, 1, 1),
                 Translation = new float3(0, 0, 0)
             };
-
+            _bodyTransform = new TransformComponent
+            {
+                Rotation = new float3(0, 0, 0),
+                Scale = new float3(1, 1, 1),
+                Translation = new float3(0, 6, 0)
+            };
+            _upperTransform = new TransformComponent
+            {
+                Rotation = new float3(60*M.Pi/180, 0, 0),
+                Scale = new float3(1, 1, 1),
+                Translation = new float3(2, 4, 0)
+            };
+            _lowerTransform = new TransformComponent
+            {
+                Rotation = new float3(60*M.Pi/180, 0, 0),
+                Scale = new float3(1, 1, 1),
+                Translation = new float3(-2, 4, 0)
+            };
             // Setup the scene graph
             return new SceneContainer
             {
@@ -51,6 +75,77 @@ namespace Fusee.Tutorial.Core
 
                             // MESH COMPONENT
                             SimpleMeshes.CreateCuboid(new float3(10, 2, 10))
+                        },
+                        Children = new List<SceneNodeContainer>
+                        {
+                            new SceneNodeContainer
+                            {
+                                Components = new List<SceneComponentContainer> //Roter Drehanteil des Krans 
+                                {
+                                    _bodyTransform,
+
+                                    new ShaderEffectComponent
+                                    {
+                                        Effect = SimpleMeshes.MakeShaderEffect(new float3(1,0.2f,0.2f),new float3(1,0.2f,0.2f),5)
+                                    },
+                                    
+                                    SimpleMeshes.CreateCuboid(new float3(2,10,2))
+                                    
+                                },
+                                Children = new List<SceneNodeContainer>{
+                                    new SceneNodeContainer
+                                    {
+                                        Components = new List<SceneComponentContainer> //Pivot-Punkt zum drehen
+                                        {
+                                            _upperTransform
+                                        },
+                                        Children = new List<SceneNodeContainer>
+                                        {
+                                            new SceneNodeContainer
+                                            {
+                                                Components = new List<SceneComponentContainer>
+                                                {
+                                                    new TransformComponent{Translation= new float3 (0f,4f,0f),Scale = new float3(1,1,1)},
+                                                    new ShaderEffectComponent
+                                                    {
+                                                        Effect = SimpleMeshes.MakeShaderEffect(new float3(0.2f,0.2f,1f),new float3(0.2f,0.2f,1f),5)
+                                                                                                                
+                                                    },
+                                                    SimpleMeshes.CreateCuboid(new float3(2f,10f,2f))
+                                                },
+                                                Children = new List<SceneNodeContainer>{
+                                                    new SceneNodeContainer
+                                                    {
+                                                        Components = new List<SceneComponentContainer> //Pivot-Punkt zum drehen
+                                                        {
+                                                            _lowerTransform
+                                                        },
+                                                        Children= new List<SceneNodeContainer>
+                                                        {
+                                                            new SceneNodeContainer
+                                                            {
+                                                                Components = new List<SceneComponentContainer>
+                                                                {
+                                                                    new TransformComponent{Translation= new float3(0,4,0), Scale = new float3(1,1,1)},
+                                                                    new ShaderEffectComponent
+                                                                    {
+                                                                        Effect = SimpleMeshes.MakeShaderEffect(new float3(0.2f,1f,0.2f),new float3(0.2f,1f,0.2f),5)
+                                                                    },
+                                                                    SimpleMeshes.CreateCuboid(new float3(2,10,2))
+                                                                }
+
+
+                                                            }
+                                                        }
+                                                    }
+                                                
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                            }
                         }
                     }
                 }
@@ -75,9 +170,15 @@ namespace Fusee.Tutorial.Core
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
+            _camAngle += Keyboard.ADAxis* Time.DeltaTime;
+            _lowerangle += Keyboard.WSAxis* Time.DeltaTime;
+            _upperangle += Keyboard.UpDownAxis * Time.DeltaTime;
+            _bodyangle += Keyboard.LeftRightAxis * Time.DeltaTime; 
             // Setup the camera 
             RC.View = float4x4.CreateTranslation(0, -10, 50) * float4x4.CreateRotationY(_camAngle);
-
+            _bodyTransform.Rotation= new float3(0,_bodyangle,0);
+            _upperTransform.Rotation= new float3(_upperangle,0,0);
+            _lowerTransform.Rotation= new float3(_lowerangle,0,0);
             // Render the scene on the current render context
             _sceneRenderer.Render(RC);
 
