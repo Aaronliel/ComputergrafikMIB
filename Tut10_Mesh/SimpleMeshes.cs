@@ -172,12 +172,126 @@ namespace Fusee.Tutorial.Core
             return ShaderCodeBuilder.MakeShaderEffectFromMatComp(temp);
         }
 
+        public static Mesh createCylinderFlat(float r, float h, int segments){
+            float deltaAngle = 2*M.Pi/segments;
+            float top = h * (0.5f);
+            float bottom = -h; 
 
-        public static Mesh CreateCylinder(float radius, float height, int segments)
-        {
-            return CreateConeFrustum(radius, radius, height, segments);
+            ushort[] tris = new ushort[segments*3];
+            float3[] verts = new float3[segments+1];
+            float3[] norms = new float3[segments+1];
+            verts[segments] = float3.Zero;
+            norms[segments] = float3.UnitY;
+            verts[0] = new float3(r,top,0);
+            norms[0] = float3.UnitY;
+            
+
+            for (int i = 1; i < segments; i++){
+                verts[i] = new float3(r*M.Cos(i*deltaAngle),top,r*M.Sin(i*deltaAngle));
+                norms[i] = float3.UnitY;
+                tris[3*i-1] = (ushort) segments;
+                tris[3*i-2] = (ushort) i;
+                tris[3*i-3] = (ushort) (i-1); 
+            }
+            tris[3*segments-1] = (ushort)segments;
+            tris[3*segments-2] = (ushort)0;
+            tris[3*segments-3] = (ushort) (segments-1);
+
+            
+            return new Mesh{
+                Vertices = verts,
+                Triangles = tris,
+                Normals = norms
+
+            };
         }
 
+        public static Mesh createCylinder(float r, float h, int segments){
+            float deltaAngle = 2*M.Pi/segments;
+            float top = h * (0.5f);
+            float bottom = -top; 
+
+            ushort[] tris = new ushort[4*(segments*3)];
+            float3[] verts = new float3[2*(2*segments+1)];
+            float3[] norms = new float3[2*(2*segments+1)];
+            
+            
+            //Top-Fläche Mittel und EndPunkt
+            verts[segments] = new float3(0,top,0);
+            norms[segments] = float3.UnitY;
+            verts[0] = new float3(r,top,0);
+            norms[0] = float3.UnitY;
+
+            for (int i = 1; i < segments; i++){
+                //Deckel
+                verts[i] = new float3(r*M.Cos(i*deltaAngle),top,r*M.Sin(i*deltaAngle));
+                norms[i] = float3.UnitY;
+                tris[3*i-1] = (ushort) segments;
+                tris[3*i-2] = (ushort) i;
+                tris[3*i-3] = (ushort) (i-1); 
+
+                //Boden
+                verts[i + segments+1] = new float3(r*M.Cos(i*deltaAngle),bottom,r*M.Sin(i*deltaAngle));
+                norms[i + segments+1] = new float3(0,-1,0);
+                tris[3*i-3+3*segments] = (ushort) (2*segments+1);
+                tris[3*i-2+3*segments] = (ushort) (segments+1 + i);
+                tris[3*i-1+ 3*segments] = (ushort) (segments+1+(i-1)); 
+
+                //Mantel-top
+                verts[i+3*segments+1] = new float3(r*M.Cos(i*deltaAngle),top,r*M.Sin(i*deltaAngle));
+                norms[i+3*segments+1] = new float3(M.Cos(i*deltaAngle),0,M.Sin(i*deltaAngle));
+                tris[3*i - 1 + 6*segments]= (ushort) (3*segments +1+i);
+                tris[3*i - 2 + 6*segments]= (ushort) (2*segments  +2+i);
+                tris[3*i -3 + 6*segments]= (ushort) (2*segments +2+(i-1));
+
+                //Mantel-bottom
+                verts[i+2*segments+1] = new float3(r*M.Cos(i*deltaAngle),bottom,r*M.Sin(i*deltaAngle));
+                norms[i+2*segments+1] = new float3(M.Cos(i*deltaAngle),0,M.Sin(i*deltaAngle));
+                tris[3*i - 3 + 9*segments]= (ushort) (2*segments+2 +i);
+                tris[3*i - 2 + 9*segments]= (ushort) (3*segments +2 +i);
+                tris[3*i -1 + 9*segments]= (ushort) (3*segments +2+(i-1));
+            }
+
+            //Top
+            tris[3*segments-1] = (ushort) segments;
+            tris[3*segments-2] = (ushort) 0;
+            tris[3*segments-3] = (ushort) (segments-1);
+
+            //Bottom
+            verts[segments+1] = new float3(0,bottom,0);
+            norms[segments+1] = new float3(0,-1,0);   
+            verts[2*segments+1] = new float3(r,bottom,0);
+            norms[2*segments+1] = new float3(0,-1,0);
+
+            tris[6*segments-1] = (ushort) (segments*2+1);
+            tris[6*segments-2] = (ushort) (segments+1);
+            tris[6*segments-3] = (ushort) (segments*2);
+
+            //Mantel-Bottom
+            verts[3*segments + 1] = new float3(r,bottom,0);
+            norms[3*segments + 1] = new float3(1,0,0);
+
+            //Mantel-Top
+            verts[4*segments + 1] = new float3(r,top,0);
+            norms[4*segments + 1] = new float3(1,0,0);
+
+
+         
+            tris[9*segments -1] = (ushort) (4*segments +1);
+            tris[9*segments -2] = (ushort) (2*segments+2);
+            tris[9*segments -3] = (ushort) (3*segments+1);
+
+            tris[12*segments -1] = (ushort) (2*segments+2);
+            tris[12*segments -2] = (ushort) (4*segments +1);
+            tris[12*segments -3] = (ushort) (3*segments +2);
+
+            return new Mesh{
+                Vertices = verts,
+                Triangles = tris,
+                Normals = norms
+
+            };
+        }
         public static Mesh CreateCone(float radius, float height, int segments)
         {
             return CreateConeFrustum(radius, 0.0f, height, segments);

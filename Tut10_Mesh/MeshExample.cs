@@ -16,6 +16,7 @@ namespace Fusee.Tutorial.Core
 {
     public class MeshExample : RenderCanvas
     {
+
         private SceneContainer _scene;
         private SceneRenderer _sceneRenderer;
         private TransformComponent _baseTransform;
@@ -49,13 +50,14 @@ namespace Fusee.Tutorial.Core
                             },
 
                             // MESH COMPONENT
-                            SimpleMeshes.CreateCuboid(new float3(10, 10, 10))
+                            SimpleMeshes.createCylinder(5, 5, 8)
                         }
                     },
                 }
             };
         }
-
+        public float d2r(float d) => d*M.Pi/180;
+        
         // Init is called on startup. 
         public override void Init()
         {
@@ -71,8 +73,10 @@ namespace Fusee.Tutorial.Core
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
-            _baseTransform.Rotation = new float3(0, M.MinAngle(TimeSinceStart), 0);
-
+            _baseTransform.Rotation = new float3(M.MinAngle(TimeSinceStart),M.MinAngle(TimeSinceStart),0);
+            // _baseTransform.Rotation.x -= Touch.GetVelocity(TouchPoints.Touchpoint_0).y*DeltaTime*0.01f;
+            // _baseTransform.Rotation.y -= Touch.GetVelocity(TouchPoints.Touchpoint_0).x*DeltaTime*0.01f;
+                	    
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
