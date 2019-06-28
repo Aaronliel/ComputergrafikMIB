@@ -50,7 +50,7 @@ namespace Fusee.Tutorial.Core
                             },
 
                             // MESH COMPONENT
-                            SimpleMeshes.createCylinder(5, 5, 8)
+                            SimpleMeshes.createCylinder(8, 6, 12)
                         }
                     },
                 }

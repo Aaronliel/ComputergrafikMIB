@@ -139,7 +139,7 @@ namespace Fusee.Tutorial.Core
             if (hue < 180) return q2;
             if (hue < 240) return q1 + (q2 - q1) * (240 - hue) / 60;
             return q1;
-}
+        }
  
 
         // Is called when the window was resized
